@@ -28,3 +28,19 @@ yarn-error.log*
 .env.development.local
 .env.test.local
 .env.production.local
+
+node_modules
+
+#Hardhat files
+cache
+artifacts
+
+node_modules
+
+#Buidler files
+cache
+artifacts
+
+.vscode
+
+typechain
