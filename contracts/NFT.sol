@@ -12,13 +12,13 @@ import "@openzeppelin/contracts/token/ERC721/ERC721.sol";
 contract NFT is ERC721URIStorage {
   using Counters for Counters.Counter;
   Counters.Counter private _tokenIds;
-  address internal contractAddress;
+  address private _contractAddress;
 
   /**
    * @param marketPlaceAddress is the as address of the market place of this NFT Token
    */
   constructor(address marketPlaceAddress) ERC721("Thinkovator Tokens", "THINK") {
-    contractAddress = marketPlaceAddress;
+    _contractAddress = marketPlaceAddress;
   }
 
   /**
@@ -32,7 +32,8 @@ contract NFT is ERC721URIStorage {
 
     _safeMint(msg.sender, newItemId);
     _setTokenURI(newItemId, tokenURI);
-    setApprovalForAll(contractAddress, true);
+    setApprovalForAll(_contractAddress, true);
+
     return newItemId;
   }
 }

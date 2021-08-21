@@ -29,7 +29,7 @@ describe('NFT', () => {
 
   describe('CreateToken', async () => {
     it('should return a token id', async () => {
-      let token = await nft.createToken("https://www.tokenUri.com");
+      let token = await nft.createToken('https://www.tokenUri.com');
       expect(BigNumber.isBigNumber(BigNumber.from(token.data))).to.be.true;
     });
   });
