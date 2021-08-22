@@ -8,6 +8,8 @@ import "@openzeppelin/contracts/token/ERC721/ERC721.sol";
 /**
  * @author Derek Arends
  * @title A simple contract to mint NFTs
+ * @dev This will create a contract specific to the maket place
+ * and create a token to associate the uri with the sender
  */
 contract NFT is ERC721URIStorage {
   using Counters for Counters.Counter;

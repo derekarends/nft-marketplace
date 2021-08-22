@@ -12,11 +12,10 @@ const { expect } = chai;
 const wei = 10 ** 18;
 const auctionPrice = ethers.utils.parseUnits('10', 'ether');
 
-describe('NFTMarket', async () => {
+describe('NFTMarket', () => {
   let nftMarket: NFTMarket;
   let nft: NFT;
   let listingPrice: BigNumber;
-  const signers = await ethers.getSigners();
   
   beforeEach(async () => {
     const nftMarketFactory = await ethers.getContractFactory('NFTMarket');
@@ -71,10 +70,15 @@ describe('NFTMarket', async () => {
   });
 
   describe('createMarketSale', async () => {
-    const market = signers[0];
-    const seller = signers[1];
-    const buyer = signers[2];
+    let market: SignerWithAddress;
+    let seller: SignerWithAddress;
+    let buyer: SignerWithAddress;
     beforeEach(async () => {
+      const signers = await ethers.getSigners();
+      market = signers[0]
+      seller = signers[1]
+      buyer = signers[2];
+      
       await nft.connect(seller).createToken('https://www.mytokenlocation.com');
       await nftMarket.connect(seller).createItem(nft.address, 1, auctionPrice, { value: listingPrice });
     });
@@ -90,14 +94,22 @@ describe('NFTMarket', async () => {
     });
 
     it('should transfer funds', async () => {
-        const tx = await nftMarket.connect(buyer).createMarketSale(nft.address, 1, { value: auctionPrice });
-        const sellerProfit = BigNumber.from(auctionPrice).sub(listingPrice);
-        expect(tx, 'market balance should have changed by listing price').to.changeEtherBalance(market, listingPrice);
-        // expect(tx, 'seller balance should have changed by seller profit').to.changeEtherBalance(seller, sellerProfit);
+      const tx = await nftMarket.connect(buyer).createMarketSale(nft.address, 1, { value: auctionPrice });
+      const sellerProfit = BigNumber.from(auctionPrice).sub(listingPrice);
+      const negAuctionPrice = BigNumber.from(auctionPrice).mul(-1);
+      expect(tx, 'market balance should have changed by listing price').to.changeEtherBalance(market, listingPrice);
+      expect(tx, 'buyer balance should have changed by auction price').to.changeEtherBalance(buyer, negAuctionPrice);
+      // expect(tx, 'seller balance should have changed by seller profit').to.changeEtherBalance(seller, sellerProfit);
     });
   });
 
-  describe('fetchMarketPlaceItems', async () => {
+  describe('fetchUnsoldItems', async () => {
+    let buyer: SignerWithAddress;
+    beforeEach(async () => {
+      const signers = await ethers.getSigners();
+      buyer = signers[1];
+    });
+
     it('should return an empty array', async () => {
       const items = await nftMarket.fetchUnsoldItems();
       expect(items).to.be.empty;
@@ -124,11 +136,62 @@ describe('NFTMarket', async () => {
       await nft.createToken('https://www.mytokenlocation2.com');
       await nftMarket.createItem(nft.address, 2, auctionPrice, { value: listingPrice });
 
-      await nftMarket.connect(signers[1]).createMarketSale(nft.address, 1, { value: auctionPrice });
+      await nftMarket.connect(buyer).createMarketSale(nft.address, 1, { value: auctionPrice });
 
       const items = await nftMarket.fetchUnsoldItems();
       expect(items.length).to.be.eq(1);
       expect(BigNumber.from(items[0].itemId).toNumber()).to.be.eq(2);
+    });
+  });
+
+  describe('fetchMyNFTs', async () => {
+    let buyer: SignerWithAddress;
+    beforeEach(async () => {
+      const signers = await ethers.getSigners();
+      buyer = signers[1];
+    });
+
+    it('returns and empty array', async () => {
+      const items = await nftMarket.fetchMyNFTs();
+      expect(items).to.be.empty;
+    });
+
+    it('should return one results because buyer bought one', async () => {
+      await nft.createToken('https://www.mytokenlocation.com');
+      await nftMarket.createItem(nft.address, 1, auctionPrice, { value: listingPrice });
+
+      await nft.createToken('https://www.mytokenlocation2.com');
+      await nftMarket.createItem(nft.address, 2, auctionPrice, { value: listingPrice });
+
+      await nftMarket.connect(buyer).createMarketSale(nft.address, 2, { value: auctionPrice });
+
+      const items = await nftMarket.connect(buyer).fetchMyNFTs();
+      expect(items.length).to.be.eq(1);
+      expect(BigNumber.from(items[0].itemId).toNumber()).to.be.eq(2);
+    });
+  });
+
+  describe('fetchMyNFTs', async () => {
+    let seller: SignerWithAddress;
+    beforeEach(async () => {
+      const signers = await ethers.getSigners();
+      seller = signers[1];
+    });
+
+    it('should return an empty array', async () => {
+      const items = await nftMarket.fetchItemsCreated();
+      expect(items).to.be.empty;
+    });
+
+    it('should return two results because seller created two items', async () => {
+      await nft.connect(seller).createToken('https://www.mytokenlocation.com');
+      await nftMarket.connect(seller).createItem(nft.address, 1, auctionPrice, { value: listingPrice });
+
+      await nft.connect(seller).createToken('https://www.mytokenlocation2.com');
+      await nftMarket.connect(seller).createItem(nft.address, 2, auctionPrice, { value: listingPrice });
+
+      const items = await nftMarket.connect(seller).fetchItemsCreated();
+      expect(items.length).to.be.eq(2);
     });
   });
 });
