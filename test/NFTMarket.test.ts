@@ -16,6 +16,11 @@ describe('NFTMarket', () => {
   let nftMarket: NFTMarket;
   let nft: NFT;
   let listingPrice: BigNumber;
+
+  async function createNft(id: number) {
+    await nft.createToken(`https://www.mytokenlocation${id}.com`);
+    await nftMarket.createItem(nft.address, id, auctionPrice, { value: listingPrice });
+  }
   
   beforeEach(async () => {
     const nftMarketFactory = await ethers.getContractFactory('NFTMarket');
@@ -78,7 +83,7 @@ describe('NFTMarket', () => {
       market = signers[0]
       seller = signers[1]
       buyer = signers[2];
-      
+
       await nft.connect(seller).createToken('https://www.mytokenlocation.com');
       await nftMarket.connect(seller).createItem(nft.address, 1, auctionPrice, { value: listingPrice });
     });
@@ -116,11 +121,8 @@ describe('NFTMarket', () => {
     });
 
     it('should return two results', async () => {
-      await nft.createToken('https://www.mytokenlocation.com');
-      await nftMarket.createItem(nft.address, 1, auctionPrice, { value: listingPrice });
-
-      await nft.createToken('https://www.mytokenlocation2.com');
-      await nftMarket.createItem(nft.address, 2, auctionPrice, { value: listingPrice });
+      await createNft(1);
+      await createNft(2);
 
       const items = await nftMarket.fetchUnsoldItems();
       expect(items.length).to.be.eq(2);
@@ -130,11 +132,8 @@ describe('NFTMarket', () => {
     });
 
     it('should return one results because there was one sale', async () => {
-      await nft.createToken('https://www.mytokenlocation.com');
-      await nftMarket.createItem(nft.address, 1, auctionPrice, { value: listingPrice });
-
-      await nft.createToken('https://www.mytokenlocation2.com');
-      await nftMarket.createItem(nft.address, 2, auctionPrice, { value: listingPrice });
+      await createNft(1);
+      await createNft(2);
 
       await nftMarket.connect(buyer).createMarketSale(nft.address, 1, { value: auctionPrice });
 
@@ -157,11 +156,8 @@ describe('NFTMarket', () => {
     });
 
     it('should return one results because buyer bought one', async () => {
-      await nft.createToken('https://www.mytokenlocation.com');
-      await nftMarket.createItem(nft.address, 1, auctionPrice, { value: listingPrice });
-
-      await nft.createToken('https://www.mytokenlocation2.com');
-      await nftMarket.createItem(nft.address, 2, auctionPrice, { value: listingPrice });
+      await createNft(1);
+      await createNft(2);
 
       await nftMarket.connect(buyer).createMarketSale(nft.address, 2, { value: auctionPrice });
 
@@ -171,7 +167,7 @@ describe('NFTMarket', () => {
     });
   });
 
-  describe('fetchMyNFTs', async () => {
+  describe('fetchItemsCreated', async () => {
     let seller: SignerWithAddress;
     beforeEach(async () => {
       const signers = await ethers.getSigners();
@@ -184,11 +180,12 @@ describe('NFTMarket', () => {
     });
 
     it('should return two results because seller created two items', async () => {
-      await nft.connect(seller).createToken('https://www.mytokenlocation.com');
+      await nft.connect(seller).createToken('https://www.mytokenlocation1.com');
       await nftMarket.connect(seller).createItem(nft.address, 1, auctionPrice, { value: listingPrice });
 
       await nft.connect(seller).createToken('https://www.mytokenlocation2.com');
       await nftMarket.connect(seller).createItem(nft.address, 2, auctionPrice, { value: listingPrice });
+
 
       const items = await nftMarket.connect(seller).fetchItemsCreated();
       expect(items.length).to.be.eq(2);

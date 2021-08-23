@@ -44,3 +44,4 @@ artifacts
 .vscode
 
 typechain
+config.ts
