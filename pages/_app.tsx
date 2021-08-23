@@ -12,9 +12,9 @@ function Marketplace({ Component, pageProps }) {
             Home
           </a>
         </Link>
-        <Link href="/create-asset">
+        <Link href="/dashboard">
           <a className="nav-link">
-            Sell Digital Asset
+            Dashboard
           </a>
         </Link>
         <Link href="/my-assets">
@@ -22,9 +22,9 @@ function Marketplace({ Component, pageProps }) {
             My Digital Assets
           </a>
         </Link>
-        <Link href="/dashboard">
+        <Link href="/create-asset">
           <a className="nav-link">
-            Dashboard
+            Sell Digital Asset
           </a>
         </Link>
       </nav>

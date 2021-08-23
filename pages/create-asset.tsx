@@ -19,18 +19,19 @@ function CreateAsset() {
   const router = useRouter()
 
   async function onFileInputChange(e: any) {
-    const file = e.target.files[0]
+    const file = e.target.files[0];
     try {
       const added = await client.add(
         file,
         {
-          progress: (prog) => console.log(`received: ${prog}`)
+          progress: (prog) => console.log(`received: ${prog}`),
+          pin: false
         }
-      )
-      const url = `https://ipfs.infura.io/ipfs/${added.path}`
-      setFileUrl(url)
+      );
+      const url = `https://ipfs.infura.io/ipfs/${added.path}`;
+      setFileUrl(url);
     } catch (error) {
-      console.log('Error uploading file: ', error)
+      console.log('Error uploading file: ', error);
     }
   }
 
@@ -58,9 +59,8 @@ function CreateAsset() {
     });
 
     try {
-      const added = await client.add(data);
+      const added = await client.add(data, { pin: false });
       const url = `https://ipfs.infura.io/ipfs/${added.path}`;
-      /* after file is uploaded to IPFS, pass the URL to save it on Polygon */
       createSale(url);
     } catch (error) {
       console.log('Error uploading file: ', error);

@@ -16,6 +16,7 @@ enum State {
 function Home() {
   const [nfts, setNfts] = React.useState([]);
   const [loadingState, setLoadingState] = React.useState<State>(State.loading);
+  
   React.useEffect(() => {
     loadNFTs()
   }, []);
@@ -83,7 +84,7 @@ function Home() {
         nfts.map((nft, i) => (
           <div key={i} className="col-sm-6 col-md-4">
             <div className="card mb-3">
-              <img src={nft.image} className="card-img-top" alt="..." />
+              <img src={nft.image} className="card-img-top" alt="..." style={{ height: '200px' }}/>
               <div className="card-body">
                 <h5 className="card-title">{nft.name}</h5>
                 <p className="card-text">{nft.description}</p>
