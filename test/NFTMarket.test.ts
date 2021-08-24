@@ -69,8 +69,10 @@ describe('NFTMarket', () => {
       await nft.createToken('https://www.mytokenlocation.com');
 
       const tx = await nftMarket.createItem(nft.address, 1, auctionPrice, { value: listingPrice });
-      
-      expect(tx).to.emit(nftMarket, 'MarketItemCreated')
+      expect(tx).to.emit(nftMarket, 'MarketItemCreated');
+
+      const balance = await nftMarket.provider.getBalance(nftMarket.address);
+      expect(balance).to.be.eq(listingPrice);
     });
   });
 
@@ -100,11 +102,12 @@ describe('NFTMarket', () => {
 
     it('should transfer funds', async () => {
       const tx = await nftMarket.connect(buyer).createMarketSale(nft.address, 1, { value: auctionPrice });
-      const sellerProfit = BigNumber.from(auctionPrice).sub(listingPrice);
+      const negListingPrice = BigNumber.from(listingPrice).mul(-1);
       const negAuctionPrice = BigNumber.from(auctionPrice).mul(-1);
-      expect(tx, 'market balance should have changed by listing price').to.changeEtherBalance(market, listingPrice);
-      expect(tx, 'buyer balance should have changed by auction price').to.changeEtherBalance(buyer, negAuctionPrice);
-      // expect(tx, 'seller balance should have changed by seller profit').to.changeEtherBalance(seller, sellerProfit);
+      expect(tx, 'contract balance should have decreased by listing price').to.changeEtherBalance(nftMarket, negListingPrice);
+      expect(tx, 'market balance should have increased by listing price').to.changeEtherBalance(market, listingPrice);
+      expect(tx, 'buyer balance should have decreased by auction price').to.changeEtherBalance(buyer, negAuctionPrice);
+      expect(tx, 'seller balance should have increased by seller profit').to.changeEtherBalance(seller, auctionPrice);
     });
   });
 
