@@ -77,12 +77,12 @@ describe('NFTMarket', () => {
   });
 
   describe('createMarketSale', async () => {
-    let market: SignerWithAddress;
+    let owner: SignerWithAddress;
     let seller: SignerWithAddress;
     let buyer: SignerWithAddress;
     beforeEach(async () => {
       const signers = await ethers.getSigners();
-      market = signers[0]
+      owner = signers[0]
       seller = signers[1]
       buyer = signers[2];
 
@@ -105,7 +105,7 @@ describe('NFTMarket', () => {
       const negListingPrice = BigNumber.from(listingPrice).mul(-1);
       const negAuctionPrice = BigNumber.from(auctionPrice).mul(-1);
       expect(tx, 'contract balance should have decreased by listing price').to.changeEtherBalance(nftMarket, negListingPrice);
-      expect(tx, 'market balance should have increased by listing price').to.changeEtherBalance(market, listingPrice);
+      expect(tx, 'owner balance should have increased by listing price').to.changeEtherBalance(owner, listingPrice);
       expect(tx, 'buyer balance should have decreased by auction price').to.changeEtherBalance(buyer, negAuctionPrice);
       expect(tx, 'seller balance should have increased by seller profit').to.changeEtherBalance(seller, auctionPrice);
     });
